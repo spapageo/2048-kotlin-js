@@ -1,0 +1,86 @@
+group 'com.github.spapageo.kotlin.2048'
+version '1.0-SNAPSHOT'
+
+ext.html_version = '0.6.4'
+
+buildscript {
+    ext.kotlin_version = '1.1.4-2'
+    ext.kotlin_frontend_version = "0.0.21"
+
+
+    repositories {
+        mavenCentral()
+        jcenter()
+        maven { url  "https://dl.bintray.com/kotlin/kotlin-eap" }
+    }
+    dependencies {
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+        classpath "org.jetbrains.kotlin:kotlin-frontend-plugin:$kotlin_frontend_version"
+    }
+}
+
+apply plugin: 'kotlin2js'
+apply plugin: 'org.jetbrains.kotlin.frontend'
+
+repositories {
+    mavenCentral()
+    jcenter()
+    maven { url "http://dl.bintray.com/kotlin/kotlinx.html" }
+}
+
+dependencies {
+    compile "org.jetbrains.kotlin:kotlin-stdlib-js:$kotlin_version"
+    compile "org.jetbrains.kotlin:kotlin-test-js:$kotlin_version"
+    compile "org.jetbrains.kotlinx:kotlinx-html-js:$html_version"
+}
+
+compileKotlin2Js {
+    kotlinOptions.metaInfo = true
+//    kotlinOptions.outputFile = "$project.buildDir.path/dist/js/${project.name}.js"
+    kotlinOptions.sourceMap = true
+    kotlinOptions.sourceMapEmbedSources = "always"
+    kotlinOptions.moduleKind = "commonjs"
+    kotlinOptions.main = "call"
+}
+
+kotlinFrontend {
+
+    downloadNodeJsVersion = "7.9.0"
+
+    sourceMaps = false
+
+    npm {
+        replaceVersion("kotlinx-html-js", "1.1.0")
+        replaceVersion("kotlinx-html-shared", "1.1.0")
+        replaceVersion("kotlin-js-library", "1.1.0")
+
+        dependency "react"
+        dependency "react-dom"
+        dependency "react-router"
+        dependency "jquery"
+        dependency "react-markdown"
+
+        devDependency("css-loader")
+        devDependency("html-webpack-plugin")
+        devDependency("source-map-loader")
+        devDependency("style-loader")
+        devDependency("babel-loader")
+        devDependency("babel-core")
+        devDependency("karma")
+    }
+
+    webpackBundle {
+        port = 8080
+        sourceMapEnabled = true
+    }
+}
+
+task copyResources(type: Copy) {
+    from sourceSets.main.resources.srcDirs
+    into file(buildDir.path + "/dist")
+}
+
+afterEvaluate {
+    tasks.getByName("webpack-bundle") { dependsOn(copyResources) }
+    tasks.getByName("webpack-run") { dependsOn(copyResources) }
+}
