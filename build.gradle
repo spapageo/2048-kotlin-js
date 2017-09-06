@@ -76,6 +76,7 @@ kotlinFrontend {
     webpackBundle {
         port = 8080
         sourceMapEnabled = true
+        contentPath = "$project.buildDir.path/boundle"
     }
 }
 
