@@ -36,11 +36,15 @@ dependencies {
 
 compileKotlin2Js {
     kotlinOptions.metaInfo = true
-//    kotlinOptions.outputFile = "$project.buildDir.path/dist/js/${project.name}.js"
+    kotlinOptions.outputFile = "$project.buildDir.path/dist/${project.name}.js"
     kotlinOptions.sourceMap = true
     kotlinOptions.sourceMapEmbedSources = "always"
     kotlinOptions.moduleKind = "commonjs"
     kotlinOptions.main = "call"
+}
+
+sourceSets {
+    main.output.resourcesDir = "$project.buildDir.path/dist"
 }
 
 kotlinFrontend {
@@ -61,7 +65,7 @@ kotlinFrontend {
         dependency "react-markdown"
 
         devDependency("css-loader")
-        devDependency("html-webpack-plugin")
+        devDependency("file-loader")
         devDependency("source-map-loader")
         devDependency("style-loader")
         devDependency("babel-loader")
@@ -75,12 +79,7 @@ kotlinFrontend {
     }
 }
 
-task copyResources(type: Copy) {
-    from sourceSets.main.resources.srcDirs
-    into file(buildDir.path + "/dist")
-}
-
 afterEvaluate {
-    tasks.getByName("webpack-bundle") { dependsOn(copyResources) }
-    tasks.getByName("webpack-run") { dependsOn(copyResources) }
+    tasks.getByName("webpack-bundle") { dependsOn(processResources) }
+    tasks.getByName("webpack-run") { dependsOn(processResources) }
 }
